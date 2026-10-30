@@ -15,10 +15,6 @@ NOTE: For the final testing, the breadboard will be zip-tied upside-down to the 
 #include <math.h>
 #include <Adafruit_BNO08x.h>
 
-//Set sensitivity values for rotation input to voltage output conversion
-int sens_FB = 2.25;
-int sens_RL = 2.5;
-
 //Define misc values
 void setReports();
 #define BNO08X_CS 10
@@ -29,7 +25,7 @@ Adafruit_BNO08x bno08x(BNO08X_RESET);
 sh2_SensorValue_t sensorValue;
 
 bool isMainBoard = true; // Upload with the line below commented out to the accelerometer board.
-// bool isMainBoard = false; // Upload with the line above commented out to the motor board.
+//bool isMainBoard = false; // Upload with the line above commented out to the motor board.
 
 String pcbuffer = "";
 String boardbuffer = "";
@@ -91,30 +87,36 @@ void RunSecondBoardLoop() {
         float alpha = boardbuffer.substring(0,5).toFloat()*100.; //Reads 5 decimal places of first value (alpha)
         float beta = boardbuffer.substring(7).toFloat()*100.; //Skips comma (6) and reads 5 decimal places of second value (beta)
   
-        //Convert angles to motor volatage outputs
-        float fb_Ctrl = sens_FB*alpha*255;
-        float rl_Ctrl = sens_RL*beta*255;
+        //Convert angles (in radians) to motor volatage outputs (-250 to 250)
+        float fb_Ctrl = 4.*alpha*250;
+        float rl_Ctrl = 4.*beta*250;
 
-        //Define motor voltage outputs for forward/backwards motion and define boundary conditions
-        if (fb_Ctrl >= 0 && fb_Ctrl <= 255) {
+        Serial.print("FB_ctrl:");
+        Serial.println(fb_Ctrl);
+        Serial.print("RL_ctrl:");
+        Serial.println(rl_Ctrl);
+
+
+        //Define motor voltage outputs (-250 to 250) for forward/backwards motion and define boundary conditions
+        if (fb_Ctrl >= 0 && fb_Ctrl <= 250) {
             analogWrite(9, fb_Ctrl); 
-        } else if (fb_Ctrl >= -255 && fb_Ctrl < 0) {
+        } else if (fb_Ctrl >= -250 && fb_Ctrl < 0) {
             analogWrite(10, -fb_Ctrl);
-        } else if (fb_Ctrl > 255) {
-            analogWrite(9, 255);
-        } else if (fb_Ctrl < -255) {
-            analogWrite(10, 255);
+        } else if (fb_Ctrl > 250) {
+            analogWrite(9, 250);
+        } else if (fb_Ctrl < -250) {
+            analogWrite(10, 250);
         } 
   
-        // Define motor voltage outputs for right/left motion and define boundary conditions
-        if (rl_Ctrl >= 0 && rl_Ctrl <= 255) {
+        // Define motor voltage outputs (-250 to 250) for right/left motion and define boundary conditions
+        if (rl_Ctrl >= 0 && rl_Ctrl <= 250) {
             analogWrite(A0, rl_Ctrl);
-        } else if (rl_Ctrl >= -255 && rl_Ctrl < 0) {
+        } else if (rl_Ctrl >= -250 && rl_Ctrl < 0) {
             analogWrite(A1, -rl_Ctrl);
-        } else if (rl_Ctrl > 255) {
-            analogWrite(A0, 255);
-        } else if (rl_Ctrl < -255) {
-            analogWrite(A1, 255);
+        } else if (rl_Ctrl > 250) {
+            analogWrite(A0, 250);
+        } else if (rl_Ctrl < -250) {
+            analogWrite(A1, 250);
         }
 
       }
